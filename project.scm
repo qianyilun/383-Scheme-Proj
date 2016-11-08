@@ -114,6 +114,8 @@
 ;; ----------- Part 1 ends ---------------
 
 ;; ----------- Part 2 begins ---------------
+
+;; helper function to calculate exponent expression
 (define exponent
 	(lambda (left right)
 		(cond
@@ -125,74 +127,53 @@
 	)
 )
 
-(define expression
-	(lambda (e)
-		(cons
-			((number? e)
-				e)
-			((symbol? e)
-				(get-value e))
-			;; (left operator right)
-			(else
-				(let ((left (expression (first e)))
-				   (operator (second e))
-				   (right (expression (third e))))
-					(cond
-						((equal? operator '+) 
-							(+ left right))
-						((equal? operator '-) 
-							(- left right))
-						((equal? operator '*) 
-							(* left right))
-						((equal? operator '/) 
-							(/ left right))
-						((equal? operator '**)
-							(exponent left right))
-						(else
-							(error "unknown operator"))
+(define myeval
+	(lambda (e envir)
+		(cond
+			((is-alist? envir)
+				(cond
+					((number? e)
+						e)
+					((symbol? e)
+						(get-value e envir))
+					; (left operator right)
+					(else
+						(let ((left (myeval (first e) envir))
+						   (operator (second e))
+						   (right (myeval (third e) envir)))
+							(cond
+								((equal? operator '+) 
+									(+ left right))
+								((equal? operator '-) 
+									(- left right))
+								((equal? operator '*) 
+									(* left right))
+								((equal? operator '/) 
+									(/ left right))
+								((equal? operator '**)
+									(exponent left right))
+								(else
+									(error "unknown operator"))
+							)
+						)
 					)
 				)
 			)
-		)
-	)
-)
-
-(define myeval
-	(lambda (expr envir)
-		(cond 
-			((is-alist? envir)
-				)
-			(else	
+			(else
 				(error "environment is not an association list"))
 		)
 	)
 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(define get-value
+	(lambda (e envir)
+		(cond 
+			((equal? 1 (length (get-all-pairs e envir)))
+				(second (car (get-all-pairs e envir))))
+			(else
+				(error "unknown variable"))
+		)
+	)
+)
 
 ;; ----------- Part 2 ends ---------------
